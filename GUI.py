@@ -1,25 +1,24 @@
-from vedo import Plotter, Mesh
+from vedo import Plotter, Mesh, Point
 
-# Load the STL file
-stl_path = "TestPlate.stl"
-mesh = Mesh(stl_path).c("lightblue")
+class STLViewer:
+    def __init__(self, stl_path):
+        self.stl_path = stl_path
+        self.mesh = Mesh(stl_path).c("lightblue")
+        self.plotter = Plotter(title=stl_path, axes=1)
+        self.plotter.add_callback("mouse click", self.on_click)
 
-# Create a Plotter window
-plotter = Plotter(title="STL Viewer - Click to Select", axes=1)
+    def on_click(self, event):
+        if event.actor:
+            picked_point = event.picked3d
+            print(f"Picked point: {picked_point}")
+            point_marker = Point(picked_point, r=10, c='red')
+            self.plotter += point_marker
+            self.plotter.render()
 
-# Add mesh to plotter
-plotter.show(mesh, __doc__, viewup="z")
+    def start(self):
+        self.plotter.show(self.mesh, viewup="z", interactive=True)
 
-# Define what happens when the user clicks
-def on_click(event):
-    if event.actor:
-        picked_point = event.picked3d
-        print(f"Picked point: {picked_point}")
-        # Optional: highlight the picked point
-        plotter.add_point(picked_point, r=5, c='red')
-
-# Add the click callback
-plotter.add_callback("mouse click", on_click)
-
-# Start the interactive window
-plotter.interactive().close()
+# Run the viewer
+if __name__ == "__main__":
+    viewer = STLViewer("TestPlate.stl")
+    viewer.start()
